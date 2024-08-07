@@ -51,7 +51,7 @@ public:
      * @param query The SQL query to execute.
      * @return True if the query was successfully executed, false otherwise.
      */
-    int executeQuery(const std::string& query) const;
+    int executeQuery(const std::string& query, std::vector<std::string> params) const;
 
     /**
      * @brief Executes an SQL query on the database.
@@ -60,15 +60,14 @@ public:
      * @return  A vector of maps where each map represents a row in the result
      * set, with column names as keys and column values as values.
      */
-    [[nodiscard]] std::vector<std::map<std::string, std::string>> executeQueryWithResults(
-        const std::string& query) const;
+    std::vector<std::map<std::string, std::string>> executeQueryWithResults(const std::string& query, std::vector<std::string> params) const;
 
     /**
      * @brief Prints all rows from the specified table.
      *
      * @param tableName The name of the table to print.
      */
-    void printDatabaseTable(const std::string& tableName) const;
+    void printDatabaseTable(const std::string &tableName) const;
 
     /**
      * @brief Checks if the specified table is empty.
@@ -77,6 +76,13 @@ public:
      * @return True if the table is empty, false otherwise.
      */
     bool isTableEmpty(const std::string& tableName) const;
+
+//    /**
+//     * @brief Cleans user inputted set names from spaces
+//     * @param setName The name of the set to clean.
+//     * @return std::string of set name with spaces replaced with '_'
+//     */
+//     std::string sanitizeSetName(const std::string& setName) const;
 
 private:
     sqlite3* db; // Pointer to the SQLite database connection
@@ -104,5 +110,6 @@ private:
     friend class UserSession;
     friend class DatabaseManagerTest;
     friend class UserSessionTest;
+
 };
 #endif // QUIZLITE_DATABASEMANAGER_H

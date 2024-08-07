@@ -5,8 +5,8 @@
 
 DatabaseManager* DatabaseManager::instancePtr = nullptr;
 DatabaseManager::DatabaseManager(std::string databaseName)
-    : db(nullptr)
-    , dbName(std::move(databaseName))
+        : db(nullptr)
+        , dbName(std::move(databaseName))
 {
 }
 
@@ -16,7 +16,7 @@ DatabaseManager::~DatabaseManager()
 }
 
 DatabaseManager* DatabaseManager::getDatabaseManager(
-    const std::string& databaseName)
+        const std::string& databaseName)
 {
     if (instancePtr == nullptr) {
         instancePtr = new DatabaseManager(databaseName);
@@ -42,16 +42,28 @@ void DatabaseManager::closeDatabase()
     }
 }
 
-int DatabaseManager::executeQuery(const std::string& query) const
+int DatabaseManager::executeQuery(const std::string& query, std::vector<std::string> params) const
 {
-    char* errMsg = nullptr;
-    int rc = sqlite3_exec(db, query.c_str(), nullptr, nullptr, &errMsg);
+    sqlite3_stmt *stmt;
+    int rc = sqlite3_prepare_v2(db, query.c_str(), -1, &stmt, nullptr);
     if (rc != SQLITE_OK) {
-        std::cerr << "SQL error " << errMsg << std::endl;
-        sqlite3_free(errMsg);
+        std::cerr << "Failed to prepare statement: " << sqlite3_errmsg(db) << std::endl;
+        return rc;
     }
+
+    for (size_t i = 0; i < params.size(); ++i) {
+        sqlite3_bind_text(stmt, static_cast<int>(i + 1), params[i].c_str(), -1, SQLITE_STATIC);
+    }
+
+    rc = sqlite3_step(stmt);
+    if (rc != SQLITE_DONE) {
+        std::cerr << "SQL error: " << sqlite3_errmsg(db) << std::endl;
+    }
+
+    sqlite3_finalize(stmt);
     return rc;
 }
+
 
 static int callbackStore(void* data, int argc, char** argv, char** azColName)
 {
@@ -64,7 +76,7 @@ static int callbackStore(void* data, int argc, char** argv, char** azColName)
     return 0;
 }
 
-std::vector<std::map<std::string, std::string>> DatabaseManager::executeQueryWithResults(const std::string& query) const
+std::vector<std::map<std::string, std::string>> DatabaseManager::executeQueryWithResults(const std::string& query, std::vector<std::string> params) const
 {
     std::vector<std::map<std::string, std::string>> rows;
     if (!db) {
@@ -72,12 +84,32 @@ std::vector<std::map<std::string, std::string>> DatabaseManager::executeQueryWit
         return rows;
     }
 
-    char* errorMessage = nullptr;
-    int result = sqlite3_exec(db, query.c_str(), callbackStore, &rows, &errorMessage);
+    sqlite3_stmt *stmt;
+    int result = sqlite3_prepare_v2(db, query.c_str(), -1, &stmt, nullptr);
     if (result != SQLITE_OK) {
-        std::cerr << "SQL is error: " << errorMessage << std::endl;
-        sqlite3_free(errorMessage);
+        std::cerr << "SQL is error: " << sqlite3_errmsg(db) << std::endl;
+        return rows;
     }
+
+    for (size_t i = 0; i < params.size(); ++i) {
+        sqlite3_bind_text(stmt, static_cast<int>(i + 1), params[i].c_str(), -1, SQLITE_STATIC);
+    }
+
+    while ((result = sqlite3_step(stmt)) == SQLITE_ROW) {
+        std::map<std::string, std::string> row;
+        for (int i = 0; i < sqlite3_column_count(stmt); ++i) {
+            const char *columnName = sqlite3_column_name(stmt, i);
+            const char *value = reinterpret_cast<const char *>(sqlite3_column_text(stmt, i));
+            row[columnName] = value ? value : "NULL";
+        }
+        rows.push_back(row);
+    }
+
+    if (result != SQLITE_DONE) {
+        std::cerr << "SQL error: " << sqlite3_errmsg(db) << std::endl;
+    }
+
+    sqlite3_finalize(stmt);
     return rows;
 }
 
@@ -92,7 +124,7 @@ static int callbackPrint(void* data, int argc, char** argv, char** azColName)
     return 0;
 }
 
-void DatabaseManager::printDatabaseTable(const std::string& tableName) const
+void DatabaseManager::printDatabaseTable(const std::string &tableName) const
 {
     std::string query = "SELECT * FROM " + tableName;
     char* errorMessage = nullptr;
