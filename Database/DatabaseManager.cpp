@@ -47,7 +47,7 @@ int DatabaseManager::executeQuery(const std::string& query) const
     char* errMsg = nullptr;
     int rc = sqlite3_exec(db, query.c_str(), nullptr, nullptr, &errMsg);
     if (rc != SQLITE_OK) {
-        std::cerr << "SQL error: " << errMsg << std::endl;
+        std::cerr << "SQL error " << errMsg << std::endl;
         sqlite3_free(errMsg);
     }
     return rc;
@@ -75,7 +75,7 @@ std::vector<std::map<std::string, std::string>> DatabaseManager::executeQueryWit
     char* errorMessage = nullptr;
     int result = sqlite3_exec(db, query.c_str(), callbackStore, &rows, &errorMessage);
     if (result != SQLITE_OK) {
-        std::cerr << "SQL error: " << errorMessage << std::endl;
+        std::cerr << "SQL is error: " << errorMessage << std::endl;
         sqlite3_free(errorMessage);
     }
     return rows;
