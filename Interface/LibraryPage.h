@@ -5,31 +5,30 @@
 #ifndef LIBRARYPAGE_H
 #define LIBRARYPAGE_H
 
-#include <QWidget>
-#include <QVBoxLayout>
-#include <QLabel>
-#include <QPushButton>
-#include <QGridLayout>
-#include <QList>
-#include <QWidgetItem>
-#include <QResizeEvent>
-#include <QPushButton>
-#include <algorithm>
 #include "../User/UserSession.h"
+#include <QGridLayout>
+#include <QLabel>
+#include <QList>
+#include <QPushButton>
+#include <QResizeEvent>
+#include <QVBoxLayout>
+#include <QWidget>
+#include <QWidgetItem>
+#include <algorithm>
 
 /**
  * @class LibraryPage
  * @brief A widget for displaying and managing quiz sets in the library.
  */
 class LibraryPage : public QWidget {
-Q_OBJECT
+    Q_OBJECT
 
 public:
     /**
      * @brief Constructor for LibraryPage.Œ
      * @param parent The parent widget.
      */
-    explicit LibraryPage(QWidget *parent = nullptr);
+    explicit LibraryPage(QWidget* parent = nullptr);
 
 signals:
     /**
@@ -42,7 +41,7 @@ signals:
      *
      * @param setName The name of the set to be opened.
      */
-    void openSetClicked(const QString &setName);
+    void openSetClicked(const QString& setName);
 
 public slots:
     /**
@@ -55,7 +54,7 @@ public slots:
      *
      * @param setName The name of the set to be added.
      */
-    void addSetButton(const QString &setName);
+    void addSetButton(const QString& setName);
 
 protected:
     /**
@@ -63,16 +62,16 @@ protected:
      *
      * @param event The resize event.
      */
-    void resizeEvent(QResizeEvent *event) override;
+    void resizeEvent(QResizeEvent* event) override;
 
 private:
-    QVBoxLayout *ui;
-    QLabel *pageLabel;
-    QPushButton *createSetButton;
-    QLabel *yourSetsLabel;
-    QLabel *logoLabel;
-    QGridLayout *setButtonsLayout;
-    QList<QPushButton *> setButtons;
+    QVBoxLayout* ui;
+    QLabel* pageLabel;
+    QPushButton* createSetButton;
+    QLabel* yourSetsLabel;
+    QLabel* logoLabel;
+    QGridLayout* setButtonsLayout;
+    QList<QPushButton*> setButtons;
 
     /**
      * @brief Updates the layout of set buttons based on the current window size.

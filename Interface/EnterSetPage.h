@@ -1,14 +1,13 @@
 #ifndef QUIZLITE_ENTERSETPAGE_H
 #define QUIZLITE_ENTERSETPAGE_H
 
-#include <QtWidgets>
-#include <QtCore>
-#include "MCPage.h"
-#include <map>
-#include <iostream>
-#include "../User/UserSession.h"
 #include "../Menu/Shortcuts.h"
-
+#include "../User/UserSession.h"
+#include "MCPage.h"
+#include <QtCore>
+#include <QtWidgets>
+#include <iostream>
+#include <map>
 
 class Shortcuts;
 
@@ -17,17 +16,16 @@ class Shortcuts;
  * @brief A widget for managing and interacting with a specific quiz set.
  */
 class EnterSetPage : public QWidget {
-Q_OBJECT
-    QPushButton *backToLibraryButton;
+    Q_OBJECT
+    QPushButton* backToLibraryButton;
 
 public:
-
     /**
      * @brief Constructor for EnterSetPage.
      *
      * @param parent The parent widget.
      */
-    EnterSetPage(QWidget *parent = nullptr);
+    EnterSetPage(QWidget* parent = nullptr);
 
 signals:
     /**
@@ -35,7 +33,7 @@ signals:
      *
      * @param setName The name of the set to be opened.
      */
-    void openSetClicked(const QString &setName);
+    void openSetClicked(const QString& setName);
 
     /**
      * @brief Signal emitted when the back to library button is clicked.
@@ -47,28 +45,28 @@ signals:
      *
      * @param setName The name of the set to start quiz.
      */
-    void openMCPageClicked(const QString &setName);
+    void openMCPageClicked(const QString& setName);
 
     /**
      * @brief Signal emitted when the inverse multiple choice button is clicked.
      *
      * @param setName The name of the set to start quiz.
      */
-    void openInverseMCPageClicked(const QString &setName);
+    void openInverseMCPageClicked(const QString& setName);
 
     /**
      * @brief Signal emitted when the flashcards button is clicked.
      *
      * @param setname The name of the set to start quiz.
      */
-    void openFlashcardsPageClicked(const QString &setname);
+    void openFlashcardsPageClicked(const QString& setname);
 
     /**
      * @brief Signal emitted when a set is deleted.
      *
      * @param setName The name of the set to be deleted.
      */
-    void deleteSetClicked(const QString &setName);
+    void deleteSetClicked(const QString& setName);
 
     /**
      * @brief Signal emitted when a key-value pair is deleted from a set.
@@ -76,7 +74,7 @@ signals:
      * @param setName The name of the set.
      * @param key The key of the key-value pair to be deleted.
      */
-    void deleteKeyValuePairClicked(const QString &setName, const QString &key);
+    void deleteKeyValuePairClicked(const QString& setName, const QString& key);
 
     /**
      * @brief Signal emitted when a key-value pair is adjusted in a set.
@@ -85,16 +83,14 @@ signals:
      * @param key The key of the key-value pair to be adjusted.
      * @param newValue The new value of the key-value pair.
      */
-    void adjustKeyValuePairClicked(const QString &setName, const QString &key, const QString &newValue);
+    void adjustKeyValuePairClicked(const QString& setName, const QString& key, const QString& newValue);
 
     /**
      * @brief Signal emitted to confirm deletion of a set.
      *
      * @param setName The name of the set to be deleted.
      */
-    void confirmDeleteSet(const QString &setName);
-
-
+    void confirmDeleteSet(const QString& setName);
 
 public slots:
     /**
@@ -102,21 +98,21 @@ public slots:
      *
      * @param setName The name of the set to be added.
      */
-    void addSet(const QString &setName);
+    void addSet(const QString& setName);
 
     /**
      * @brief Sets the name of the current set.
      *
      * @param setName The name of the current set.
      */
-    void setSetName(const QString &setName);
+    void setSetName(const QString& setName);
 
     /**
      * @brief Sets the QA list for the specified set.
      *
      * @param setName The name of the set.
      */
-    void setQAList(const QString &setName);
+    void setQAList(const QString& setName);
 
     /**
      * @brief Clears all entries from the QA list.
@@ -133,7 +129,7 @@ public slots:
      *
      * @param setName The name of the set to be deleted.
      */
-    void deleteSet(const QString &setName);
+    void deleteSet(const QString& setName);
 
     /**
      * @brief Deletes a key-value pair from a specified set.
@@ -141,7 +137,7 @@ public slots:
      * @param setName The name of the set.
      * @param key The key of the key-value pair to be deleted.
      */
-    void deleteKeyValuePair(const QString &setName, const QString &key);
+    void deleteKeyValuePair(const QString& setName, const QString& key);
 
     /**
      * @brief Adjusts a key-value pair in a specified set.
@@ -150,7 +146,7 @@ public slots:
      * @param key The key of the key-value pair to be adjusted.
      * @param newValue The new value of the key-value pair.
      */
-    void adjustKeyValuePair(const QString &setName, const QString &key, const QString &newValue);
+    void adjustKeyValuePair(const QString& setName, const QString& key, const QString& newValue);
 
     /**
      * @brief Gets the current set name.
@@ -173,8 +169,7 @@ public slots:
      */
     void openFlashcardsPage();
 
-
-    void setShortcuts(Shortcuts *shortcuts);
+    void setShortcuts(Shortcuts* shortcuts);
 
 protected:
     /**
@@ -184,22 +179,22 @@ protected:
      * @param event The event to be processed.
      * @return True if the event was handled; otherwise false.
      */
-    bool eventFilter(QObject *watched, QEvent *event) override;
+    bool eventFilter(QObject* watched, QEvent* event) override;
 
 private:
-    QVBoxLayout *ui;
-    QLabel *setNameLabel;
-    QLabel *pageLabel;
-    QListWidget *qaListWidget;
+    QVBoxLayout* ui;
+    QLabel* setNameLabel;
+    QLabel* pageLabel;
+    QListWidget* qaListWidget;
     QString currentSetName;
     std::map<QString, QWidget*> setWidgets;
-    QScrollArea *scrollArea;
-    QStackedWidget *studyMethodsPageStack;
-    QPushButton *mcButton;
-    QPushButton *inverseMCButton;
-    QPushButton *flashcardsButton;
-    QLabel *studyMethodsLabel;
-    Shortcuts *m_shortcuts;
+    QScrollArea* scrollArea;
+    QStackedWidget* studyMethodsPageStack;
+    QPushButton* mcButton;
+    QPushButton* inverseMCButton;
+    QPushButton* flashcardsButton;
+    QLabel* studyMethodsLabel;
+    Shortcuts* m_shortcuts;
 
     void setupStudyMethodButtons();
     void setupBackButton();

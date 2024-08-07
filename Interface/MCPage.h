@@ -1,16 +1,16 @@
 #ifndef QUIZLITE_MCPAGE_H
 #define QUIZLITE_MCPAGE_H
 
-#include "EnterSetPage.h"
 #include "../StudyingMethods/MultipleChoice.h"
-#include <QtWidgets>
+#include "EnterSetPage.h"
 #include <QtCore>
+#include <QtWidgets>
 
 class MCPage : public QWidget {
-Q_OBJECT
+    Q_OBJECT
 public:
-    MCPage(QWidget *parent = nullptr);
-    void startMCQuiz(const QString &setName);
+    MCPage(QWidget* parent = nullptr);
+    void startMCQuiz(const QString& setName);
     void resetQuiz();
 
 signals:
@@ -19,15 +19,15 @@ signals:
 
 private:
     QString currentSetName;
-    MultipleChoice *mc;
-    QVBoxLayout *ui;
-    QLabel *questionLabel;
-    QButtonGroup *answerGroup;
+    MultipleChoice* mc;
+    QVBoxLayout* ui;
+    QLabel* questionLabel;
+    QButtonGroup* answerGroup;
     QVector<QRadioButton*> answerButtons;
-    QPushButton *submitButton;
-    QPushButton *nextButton;
-    QPushButton *finishButton;
-    QPushButton *backToSetButton;
+    QPushButton* submitButton;
+    QPushButton* nextButton;
+    QPushButton* finishButton;
+    QPushButton* backToSetButton;
 
     int currentScore;
     int totalQuestions;
@@ -41,4 +41,4 @@ private:
     void setupBackToSetButton();
 };
 
-#endif //QUIZLITE_MCPAGE_H
+#endif // QUIZLITE_MCPAGE_H

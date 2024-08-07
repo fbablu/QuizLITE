@@ -6,6 +6,9 @@
 #define QUIZLITE_CREATESETPAGE_H
 
 #include "MainWindow.h"
+#include <QtCore>
+#include <QtWidgets>
+#include <QVBoxLayout>
 
 /**
  * @class CreateSetPage
@@ -13,7 +16,7 @@
  * @brief A widget for creating a new quiz set.
  */
 class CreateSetPage : public QWidget {
-    Q_OBJECT
+Q_OBJECT
     QPushButton *backToLibraryButton;
 
 public:

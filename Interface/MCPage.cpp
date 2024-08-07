@@ -1,11 +1,18 @@
-#include <QMessageBox>
 #include "MCPage.h"
+#include <QMessageBox>
 
-MCPage::MCPage(QWidget *parent) : QWidget(parent), mc(nullptr), currentScore(0), totalQuestions(0), setSize(0) {
+MCPage::MCPage(QWidget* parent)
+    : QWidget(parent)
+    , mc(nullptr)
+    , currentScore(0)
+    , totalQuestions(0)
+    , setSize(0)
+{
     setupUI();
 }
 
-void MCPage::startMCQuiz(const QString &setName) {
+void MCPage::startMCQuiz(const QString& setName)
+{
     currentSetName = setName;
     resetQuiz();
 
@@ -14,33 +21,33 @@ void MCPage::startMCQuiz(const QString &setName) {
     auto qaPair = currentSession->getTableKeyValues(setName.toStdString());
     int totalPairs = qaPair.size();
     if (totalPairs % 2 == 0) {
-        mc = new MultipleChoice(setName.toStdString(), totalPairs/2, totalPairs/2);
+        mc = new MultipleChoice(setName.toStdString(), totalPairs / 2, totalPairs / 2);
     } else {
         --totalPairs;
-        mc = new MultipleChoice(setName.toStdString(), totalPairs/2, (totalPairs/2)+1);
+        mc = new MultipleChoice(setName.toStdString(), totalPairs / 2, (totalPairs / 2) + 1);
     }
     showQuestion();
 
     setSize = currentSession->getStudySetSize(setName.toStdString());
 }
 
-void MCPage::resetQuiz() {
+void MCPage::resetQuiz()
+{
     currentScore = 0;
     totalQuestions = 0;
     questionLabel->clear();
-    for (auto &button : answerButtons) {
+    for (auto& button : answerButtons) {
         button->hide();
         button->setChecked(false);
         button->setStyleSheet(
-                "QRadioButton {"
-                "font-size: 18px;"
-                "color: #FFFFFF;"
-                "background-color: #403e3e;"
-                "border-radius: 10px;"
-                "padding: 5px;"
-                "margin: 2px 0;"
-                "}"
-        );
+            "QRadioButton {"
+            "font-size: 18px;"
+            "color: #FFFFFF;"
+            "background-color: #403e3e;"
+            "border-radius: 10px;"
+            "padding: 5px;"
+            "margin: 2px 0;"
+            "}");
     }
     submitButton->show();
     nextButton->hide();
@@ -48,34 +55,35 @@ void MCPage::resetQuiz() {
     backToSetButton->show();
 }
 
-void MCPage::finishQuiz() {
+void MCPage::finishQuiz()
+{
     float accuracy = (totalQuestions > 0) ? (static_cast<float>(currentScore) / totalQuestions * 100) : 0;
 
     QMessageBox::information(this,
-                             "Quiz Finished",
-                             "Your score: " + QString::number(currentScore) + "/" + QString::number(totalQuestions) + "\nAccuracy: " + QString::number(accuracy) + "%");
+        "Quiz Finished",
+        "Your score: " + QString::number(currentScore) + "/" + QString::number(totalQuestions) + "\nAccuracy: " + QString::number(accuracy) + "%");
 
-    emit backToSetClicked();  // Emit signal to navigate back to the set screen
+    emit backToSetClicked(); // Emit signal to navigate back to the set screen
 }
 
-void MCPage::setupUI() {
+void MCPage::setupUI()
+{
     ui = new QVBoxLayout(this);
 
     backToSetButton = new QPushButton("Back to Set", this);
     backToSetButton->setStyleSheet(
-            "QPushButton {"
-            "background-color: #2bb52b;"
-            "color: #000000;"
-            "font-size: 18px;"
-            "padding: 5px;"
-            "border-radius: 15px;"
-            "border: 2px solid #2bb52b;"
-            "}"
-            "QPushButton:hover {"
-            "background-color: #32CD32;"
-            "border: 2px solid #32CD32;"
-            "}"
-    );
+        "QPushButton {"
+        "background-color: #2bb52b;"
+        "color: #000000;"
+        "font-size: 18px;"
+        "padding: 5px;"
+        "border-radius: 15px;"
+        "border: 2px solid #2bb52b;"
+        "}"
+        "QPushButton:hover {"
+        "background-color: #32CD32;"
+        "border: 2px solid #32CD32;"
+        "}");
     setupBackToSetButton();
     ui->addWidget(backToSetButton, 0, Qt::AlignLeft);
 
@@ -93,15 +101,14 @@ void MCPage::setupUI() {
     for (int i = 0; i < 4; ++i) {
         auto answerButton = new QRadioButton(this);
         answerButton->setStyleSheet(
-                "QRadioButton {"
-                "font-size: 18px;"
-                "color: #FFFFFF;"
-                "background-color: #403e3e;"
-                "border-radius: 10px;"
-                "padding: 5px;"
-                "margin: 2px 0;"
-                "}"
-        );
+            "QRadioButton {"
+            "font-size: 18px;"
+            "color: #FFFFFF;"
+            "background-color: #403e3e;"
+            "border-radius: 10px;"
+            "padding: 5px;"
+            "margin: 2px 0;"
+            "}");
         answerButtons.append(answerButton);
         answerLayout->addWidget(answerButton, 0, Qt::AlignBottom);
         answerGroup->addButton(answerButton, i);
@@ -115,53 +122,50 @@ void MCPage::setupUI() {
     QVBoxLayout* bottomLayout = new QVBoxLayout(); // New layout for the bottom buttons
     submitButton = new QPushButton("Submit", this);
     submitButton->setStyleSheet(
-            "QPushButton {"
-            "background-color: #2bb52b;"
-            "color: #000000;"
-            "font-size: 18px;"
-            "padding: 5px;"
-            "border-radius: 15px;"
-            "border: 2px solid #2bb52b;"
-            "}"
-            "QPushButton:hover {"
-            "background-color: #32CD32;"
-            "border: 2px solid #32CD32;"
-            "}"
-    );
+        "QPushButton {"
+        "background-color: #2bb52b;"
+        "color: #000000;"
+        "font-size: 18px;"
+        "padding: 5px;"
+        "border-radius: 15px;"
+        "border: 2px solid #2bb52b;"
+        "}"
+        "QPushButton:hover {"
+        "background-color: #32CD32;"
+        "border: 2px solid #32CD32;"
+        "}");
     bottomLayout->addWidget(submitButton, 0, Qt::AlignBottom);
 
     nextButton = new QPushButton("Next", this);
     nextButton->setStyleSheet(
-            "QPushButton {"
-            "background-color: #2bb52b;"
-            "color: #000000;"
-            "font-size: 18px;"
-            "padding: 5px;"
-            "border-radius: 15px;"
-            "border: 2px solid #2bb52b;"
-            "}"
-            "QPushButton:hover {"
-            "background-color: #32CD32;"
-            "border: 2px solid #32CD32;"
-            "}"
-    );
+        "QPushButton {"
+        "background-color: #2bb52b;"
+        "color: #000000;"
+        "font-size: 18px;"
+        "padding: 5px;"
+        "border-radius: 15px;"
+        "border: 2px solid #2bb52b;"
+        "}"
+        "QPushButton:hover {"
+        "background-color: #32CD32;"
+        "border: 2px solid #32CD32;"
+        "}");
     bottomLayout->addWidget(nextButton, 0, Qt::AlignBottom);
 
     finishButton = new QPushButton("Finish", this);
     finishButton->setStyleSheet(
-            "QPushButton {"
-            "background-color: #2bb52b;"
-            "color: #000000;"
-            "font-size: 18px;"
-            "padding: 5px;"
-            "border-radius: 15px;"
-            "border: 2px solid #2bb52b;"
-            "}"
-            "QPushButton:hover {"
-            "background-color: #32CD32;"
-            "border: 2px solid #32CD32;"
-            "}"
-    );
+        "QPushButton {"
+        "background-color: #2bb52b;"
+        "color: #000000;"
+        "font-size: 18px;"
+        "padding: 5px;"
+        "border-radius: 15px;"
+        "border: 2px solid #2bb52b;"
+        "}"
+        "QPushButton:hover {"
+        "background-color: #32CD32;"
+        "border: 2px solid #32CD32;"
+        "}");
     bottomLayout->addWidget(finishButton, 0, Qt::AlignBottom);
 
     ui->addLayout(bottomLayout); // Add the bottomLayout to the main layout
@@ -176,7 +180,8 @@ void MCPage::setupUI() {
     setLayout(ui);
 }
 
-void MCPage::showQuestion() {
+void MCPage::showQuestion()
+{
     std::string question = mc->getQuestion();
     if (question.empty()) {
         finishQuiz();
@@ -187,7 +192,7 @@ void MCPage::showQuestion() {
     auto options = mc->generateOptions();
 
     // Hide all existing buttons first
-    for (auto &button : answerButtons) {
+    for (auto& button : answerButtons) {
         button->hide();
     }
 
@@ -196,15 +201,14 @@ void MCPage::showQuestion() {
         if (answerButtons.size() <= 0) {
             auto answerButton = new QRadioButton(this);
             answerButton->setStyleSheet(
-                    "QRadioButton {"
-                    "font-size: 18px;"
-                    "color: #FFFFFF;"
-                    "background-color: #403e3e;"
-                    "border-radius: 10px;"
-                    "padding: 5px;"
-                    "margin: 2px 0;"
-                    "}"
-            );
+                "QRadioButton {"
+                "font-size: 18px;"
+                "color: #FFFFFF;"
+                "background-color: #403e3e;"
+                "border-radius: 10px;"
+                "padding: 5px;"
+                "margin: 2px 0;"
+                "}");
             answerButtons.append(answerButton);
             ui->addWidget(answerButton);
             answerGroup->addButton(answerButton, 0);
@@ -216,15 +220,14 @@ void MCPage::showQuestion() {
         if (answerButtons.size() <= 1) {
             auto answerButton = new QRadioButton(this);
             answerButton->setStyleSheet(
-                    "QRadioButton {"
-                    "font-size: 18px;"
-                    "color: #FFFFFF;"
-                    "background-color: #403e3e;"
-                    "border-radius: 10px;"
-                    "padding: 5px;"
-                    "margin: 2px 0;"
-                    "}"
-            );
+                "QRadioButton {"
+                "font-size: 18px;"
+                "color: #FFFFFF;"
+                "background-color: #403e3e;"
+                "border-radius: 10px;"
+                "padding: 5px;"
+                "margin: 2px 0;"
+                "}");
             answerButtons.append(answerButton);
             ui->addWidget(answerButton);
             answerGroup->addButton(answerButton, 1);
@@ -236,15 +239,14 @@ void MCPage::showQuestion() {
         if (answerButtons.size() <= 2) {
             auto answerButton = new QRadioButton(this);
             answerButton->setStyleSheet(
-                    "QRadioButton {"
-                    "font-size: 18px;"
-                    "color: #FFFFFF;"
-                    "background-color: #403e3e;"
-                    "border-radius: 10px;"
-                    "padding: 5px;"
-                    "margin: 2px 0;"
-                    "}"
-            );
+                "QRadioButton {"
+                "font-size: 18px;"
+                "color: #FFFFFF;"
+                "background-color: #403e3e;"
+                "border-radius: 10px;"
+                "padding: 5px;"
+                "margin: 2px 0;"
+                "}");
             answerButtons.append(answerButton);
             ui->addWidget(answerButton);
             answerGroup->addButton(answerButton, 2);
@@ -256,15 +258,14 @@ void MCPage::showQuestion() {
         if (answerButtons.size() <= 3) {
             auto answerButton = new QRadioButton(this);
             answerButton->setStyleSheet(
-                    "QRadioButton {"
-                    "font-size: 18px;"
-                    "color: #FFFFFF;"
-                    "background-color: #403e3e;"
-                    "border-radius: 10px;"
-                    "padding: 5px;"
-                    "margin: 2px 0;"
-                    "}"
-            );
+                "QRadioButton {"
+                "font-size: 18px;"
+                "color: #FFFFFF;"
+                "background-color: #403e3e;"
+                "border-radius: 10px;"
+                "padding: 5px;"
+                "margin: 2px 0;"
+                "}");
             answerButtons.append(answerButton);
             ui->addWidget(answerButton);
             answerGroup->addButton(answerButton, 3);
@@ -274,7 +275,7 @@ void MCPage::showQuestion() {
     }
 
     answerGroup->setExclusive(false);
-    for (auto &button : answerButtons) {
+    for (auto& button : answerButtons) {
         button->setChecked(false);
     }
     submitButton->show();
@@ -285,7 +286,8 @@ void MCPage::showQuestion() {
     std::cout << totalQuestions << std::endl;
 }
 
-void MCPage::checkAnswer() {
+void MCPage::checkAnswer()
+{
     int selectedAnswer = answerGroup->checkedId();
     if (selectedAnswer == -1) {
         QMessageBox::warning(this, "No Selection", "Select an answer before submitting");
@@ -301,7 +303,7 @@ void MCPage::checkAnswer() {
     mc->updateScoresInTable(isCorrect);
     submitButton->hide();
     if (mc->goToNextQuestion()) {
-        for (auto &button : answerButtons) {
+        for (auto& button : answerButtons) {
             button->setChecked(false);
         }
         nextButton->show();
@@ -309,53 +311,52 @@ void MCPage::checkAnswer() {
         finishButton->show();
     }
 
-    for (auto &button : answerButtons) {
+    for (auto& button : answerButtons) {
         if (button->text() == QString::fromStdString(correctAnswer)) {
             button->setStyleSheet(
-                    "QRadioButton {"
-                    "font-size: 18px;"
-                    "color: #FFFFFF;"
-                    "background-color: green;"
-                    "border-radius: 10px;"
-                    "padding: 5px;"
-                    "margin: 2px 0;"
-                    "}"
-            );
+                "QRadioButton {"
+                "font-size: 18px;"
+                "color: #FFFFFF;"
+                "background-color: green;"
+                "border-radius: 10px;"
+                "padding: 5px;"
+                "margin: 2px 0;"
+                "}");
         } else if (button == answerButtons[selectedAnswer]) {
             button->setStyleSheet(
-                    "QRadioButton {"
-                    "font-size: 18px;"
-                    "color: #FFFFFF;"
-                    "background-color: red;"
-                    "border-radius: 10px;"
-                    "padding: 5px;"
-                    "margin: 2px 0;"
-                    "}"
-            );
+                "QRadioButton {"
+                "font-size: 18px;"
+                "color: #FFFFFF;"
+                "background-color: red;"
+                "border-radius: 10px;"
+                "padding: 5px;"
+                "margin: 2px 0;"
+                "}");
         }
     }
 }
 
-void MCPage::showNextQuestion() {
+void MCPage::showNextQuestion()
+{
     answerGroup->setExclusive(false);
-    for (auto &button : answerButtons) {
+    for (auto& button : answerButtons) {
         button->setChecked(false);
         button->setStyleSheet(
-                "QRadioButton {"
-                "font-size: 18px;"
-                "color: #FFFFFF;"
-                "background-color: #403e3e;"
-                "border-radius: 10px;"
-                "padding: 5px;"
-                "margin: 2px 0;"
-                "}"
-        );
+            "QRadioButton {"
+            "font-size: 18px;"
+            "color: #FFFFFF;"
+            "background-color: #403e3e;"
+            "border-radius: 10px;"
+            "padding: 5px;"
+            "margin: 2px 0;"
+            "}");
     }
     answerGroup->setExclusive(true);
     showQuestion();
 }
 
-void MCPage::setupBackToSetButton() {
+void MCPage::setupBackToSetButton()
+{
     connect(backToSetButton, &QPushButton::clicked, this, [this]() {
         emit backToSetClicked();
     });
