@@ -124,7 +124,7 @@ static int callbackPrint(void* data, int argc, char** argv, char** azColName)
     return 0;
 }
 
-void DatabaseManager::printDatabaseTable(const std::string &tableName) const
+void DatabaseManager::printDatabaseTable(const std::string& tableName) const
 {
     std::string query = "SELECT * FROM " + tableName;
     char* errorMessage = nullptr;
