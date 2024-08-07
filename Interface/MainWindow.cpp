@@ -62,15 +62,7 @@ void MainWindow::connectSignalsAndSlots()
     connect(pageStack, &QStackedWidget::currentChanged, this, &MainWindow::updateMenus);
 }
 
-// void MainWindow::createMenus() {
-//     QMenu *setMenu = menuBar()->addMenu(tr("&Set"));
-//     setMenu->addAction(tr("&New Set"),QKeySequence::New, this, &MainWindow::showCreateSetPage);
-//
-//     QMenu *studyMenu = menuBar()->addMenu(tr("&Study"));
-//     studyMenu->addAction(tr("&Multiple Choice"), QKeySequence(Qt::Key_I) );
-//     studyMenu->addAction(tr("&Inverse Multiple Choice"), QKeySequence(Qt::Key_I), this, [this](){ showInverseMCPage(shortcuts->currentSetName());});
-//     studyMenu->addAction(tr("&Flashcards"), QKeySequence(Qt::Key_F),this, [this](){ showFlashcardPage(shortcuts->currentSetName()); });
-// }
+
 
 void MainWindow::updateMenus()
 {
