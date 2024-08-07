@@ -7,6 +7,10 @@
 #include <map>
 #include <iostream>
 #include "../User/UserSession.h"
+#include "../Menu/Shortcuts.h"
+
+
+class Shortcuts;
 
 /**
  * @class EnterSetPage
@@ -90,6 +94,8 @@ signals:
      */
     void confirmDeleteSet(const QString &setName);
 
+
+
 public slots:
     /**
      * @brief Adds a new set to the page.
@@ -152,6 +158,24 @@ public slots:
      */
     QString getCurrentSetName() const { return currentSetName; }
 
+    /**
+     * @brief Parameter-less public slot so that shortcut can open MC page
+     */
+    void openMCPage();
+
+    /**
+     * @brief Parameter-less public slot so that shortcut can open MC page
+     */
+    void openInversePage();
+
+    /**
+     * @brief Parameter-less public slot so that shortcut can open MC page
+     */
+    void openFlashcardsPage();
+
+
+    void setShortcuts(Shortcuts *shortcuts);
+
 protected:
     /**
      * @brief Event filter for handling custom events.
@@ -175,6 +199,7 @@ private:
     QPushButton *inverseMCButton;
     QPushButton *flashcardsButton;
     QLabel *studyMethodsLabel;
+    Shortcuts *m_shortcuts;
 
     void setupStudyMethodButtons();
     void setupBackButton();

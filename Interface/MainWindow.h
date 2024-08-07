@@ -20,6 +20,7 @@
 #include "FlashcardPage.h"
 #include <iostream>
 #include "../User/UserSession.h"
+#include "../Menu/Shortcuts.h"
 
 QT_BEGIN_NAMESPACE
 class QAction;
@@ -40,7 +41,8 @@ class AddQuestionsPage;
 class EnterSetPage;
 class MCPage;
 class InverseMCPage;
-class FlashcardsPage;
+class FlashcardPage;
+class Shortcuts;
 
 /**
  * @class MainWindow
@@ -56,11 +58,11 @@ public:
      */
     explicit MainWindow(QWidget *parent = nullptr);
 
-private slots:
+public slots:
     /**
      * @brief Shows the CreateSetPage.
      */
-    void showCreatePageSet();
+    void showCreateSetPage();
 
     /**
      * @brief Shows the AddQuestionsPage for the specified set.
@@ -96,10 +98,25 @@ private slots:
 
     /**
      * @brief Handles the deletion of a set.
-     * s
+     *
      * @param setName The name of the set to delete.
      */
     void handleDeleteSet(const QString &setName);
+
+    /**
+     * @brief Creates menus for application main window.
+     */
+    void createMenus();
+
+    void updateMenus();
+
+    void showMCPage(const QString &setName);
+    void showInverseMCPage(const QString &setName);
+    void showFlashcardPage(const QString &setName);
+
+    void connectSignalsAndSlots();
+
+    void showEnterSetPage();
 
 private:
     QStackedWidget *pageStack;
@@ -114,6 +131,8 @@ private:
     QString currentSetName;
     QMap<QString, QListWidget*> setWidgets;
     QPushButton backToLibrary;
+    Shortcuts *shortcuts;
+
 };
 
 #endif // QUIZLITE_MAINWINDOW_H

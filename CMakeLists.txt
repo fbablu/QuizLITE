@@ -62,6 +62,12 @@ add_executable(QuizLITE
         Interface/InverseMCPage.h
         Interface/FlashcardPage.cpp
         Interface/FlashcardPage.h
+        Menu/Shortcuts.cpp
+        Menu/Shortcuts.h
+        Syncing/Github.cpp
+        Syncing/Github.h
+        Syncing/Google.cpp
+        Syncing/Google.h
 )
 
 target_link_libraries(QuizLITE

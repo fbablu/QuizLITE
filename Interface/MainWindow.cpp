@@ -1,5 +1,6 @@
 #include "MainWindow.h"
-
+#include <QMenuBar>
+#include <QMessageBox>
 
 MainWindow::MainWindow(QWidget *parent) :
         QMainWindow(parent),
@@ -10,12 +11,11 @@ MainWindow::MainWindow(QWidget *parent) :
         enterSetPage(new EnterSetPage(this)),
         mcPage(new MCPage(this)),
         inverseMCPage(new InverseMCPage(this)),
-        flashcardPage(new FlashcardPage(this)) {
+        flashcardPage(new FlashcardPage(this)),
+        shortcuts(new Shortcuts(this, enterSetPage)) {
 
-    // Set stylesheets for the widgets
-    this->setStyleSheet("background-color: #000000;");
+    this->setStyleSheet("background-color: #222222;");
 
-    // Add pages onto pageStack
     pageStack->addWidget(libraryPage);
     pageStack->addWidget(createSetPage);
     pageStack->addWidget(addQuestionsPage);
@@ -25,8 +25,17 @@ MainWindow::MainWindow(QWidget *parent) :
     pageStack->addWidget(flashcardPage);
     setCentralWidget(pageStack);
 
-    // Connect pages and buttons that have been clicked, then set current page to library
-    connect(libraryPage, &LibraryPage::createSetClicked, this, &MainWindow::showCreatePageSet);
+    connectSignalsAndSlots();
+
+    pageStack->setCurrentWidget(libraryPage);
+    libraryPage->populateLibrary();
+
+    createMenus();
+    updateMenus();
+}
+
+void MainWindow::connectSignalsAndSlots() {
+    connect(libraryPage, &LibraryPage::createSetClicked, this, &MainWindow::showCreateSetPage);
     connect(createSetPage, &CreateSetPage::setNameConfirmed, this, &MainWindow::showAddQuestionsPage);
     connect(addQuestionsPage, &AddQuestionsPage::addToSetClicked, this, &MainWindow::addToSet);
     connect(addQuestionsPage, &AddQuestionsPage::finishedClicked, this, &MainWindow::finishSet);
@@ -35,71 +44,58 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(enterSetPage, &EnterSetPage::backToLibraryClicked, this, &MainWindow::showLibraryPage);
     connect(createSetPage, &CreateSetPage::backToLibraryClicked, this, &MainWindow::showLibraryPage);
     connect(addQuestionsPage, &AddQuestionsPage::backToLibraryClicked, this, &MainWindow::showLibraryPage);
-
     connect(enterSetPage, &EnterSetPage::confirmDeleteSet, this, &MainWindow::handleDeleteSet);
 
-    // Connect Multiple choice
-    connect(enterSetPage, &EnterSetPage::openMCPageClicked, this, [this](const QString &setName) {
-        mcPage->resetQuiz();
-        mcPage->startMCQuiz(setName);
-        pageStack->setCurrentWidget(mcPage);
-    });
-    connect(mcPage, &MCPage::backToSetClicked, this, [this] {
-        pageStack->setCurrentWidget(enterSetPage);
-        enterSetPage->setQAList(enterSetPage->getCurrentSetName());
-    });
 
+    //
+    connect(enterSetPage, &EnterSetPage::openSetClicked, shortcuts, &Shortcuts::setCurrentSetName);
 
+    connect(enterSetPage, &EnterSetPage::openMCPageClicked, this, &MainWindow::showMCPage);
+    connect(enterSetPage, &EnterSetPage::openInverseMCPageClicked, this, &MainWindow::showInverseMCPage);
+    connect(enterSetPage, &EnterSetPage::openFlashcardsPageClicked, this, &MainWindow::showFlashcardPage);
 
-    //Connect Inverse Multiple Choice
-    connect(enterSetPage, &EnterSetPage::openInverseMCPageClicked, this, [this](const QString &setName) {
-        inverseMCPage->resetQuiz();
-        inverseMCPage->startInverseMCQuiz(setName);
-        pageStack->setCurrentWidget(inverseMCPage);
-    });
-    connect(inverseMCPage, &InverseMCPage::backToSetClicked, this, [this] {
-        pageStack->setCurrentWidget(enterSetPage);
-        enterSetPage->setQAList(enterSetPage->getCurrentSetName());
-    });
+    connect(mcPage, &MCPage::backToSetClicked, this, &MainWindow::showEnterSetPage);
+    connect(inverseMCPage, &InverseMCPage::backToSetClicked, this, &MainWindow::showEnterSetPage);
+    connect(flashcardPage, &FlashcardPage::backToSetClicked, this, &MainWindow::showEnterSetPage);
 
-    //Connect Flashcards
-    connect(enterSetPage, &EnterSetPage::openFlashcardsPageClicked, this, [this](const QString &setName) {
-//        flashcardPage->resetQuiz();
-        flashcardPage->startFlashcardQuiz(setName);
-        pageStack->setCurrentWidget(flashcardPage);
-    });
-    connect(flashcardPage, &FlashcardPage::backToSetClicked, this, [this] {
-        pageStack->setCurrentWidget(enterSetPage);
-        enterSetPage->setQAList(enterSetPage->getCurrentSetName());
-    });
-
-
-
-    pageStack->setCurrentWidget(libraryPage);
-    libraryPage->populateLibrary(); // Populate library initially
+    connect(pageStack, &QStackedWidget::currentChanged, this, &MainWindow::updateMenus);
 }
 
-void MainWindow::showCreatePageSet() {
-    std::cout << "Showing create set page" << std::endl;
+void MainWindow::createMenus() {
+    QMenu *setMenu = menuBar()->addMenu(tr("&Set"));
+    setMenu->addAction(tr("&New Set"),QKeySequence::New, this, &MainWindow::showCreateSetPage);
+
+    QMenu *studyMenu = menuBar()->addMenu(tr("&Study"));
+//    studyMenu->addAction(tr("&Multiple Choice"),Qt::Key_M, this, &EnterSetPage::openMCPage);
+    studyMenu->addAction(tr("&Inverse Multiple Choice"), QKeySequence(Qt::Key_I), this, [this](){ showInverseMCPage(shortcuts->currentSetName());});
+    studyMenu->addAction(tr("&Flashcards"), QKeySequence(Qt::Key_F),this, [this](){ showFlashcardPage(shortcuts->currentSetName()); });
+}
+
+void MainWindow::updateMenus() {
+    QWidget *currentWidget = pageStack->currentWidget();
+    bool isLibraryPage = (currentWidget == libraryPage);
+    bool isEnterSetPage = (currentWidget == enterSetPage);
+
+    menuBar()->actions().at(0)->menu()->actions().at(0)->setEnabled(isLibraryPage);
+    menuBar()->actions().at(1)->menu()->setEnabled(isEnterSetPage);
+}
+
+void MainWindow::showCreateSetPage() {
     pageStack->setCurrentWidget(createSetPage);
 }
 
 void MainWindow::showAddQuestionsPage(const QString &setName) {
-    std::cout << "Showing add questions page for set: " << setName.toStdString() << std::endl;
     currentSetName = setName;
     currentSetQA.clear();
     pageStack->setCurrentWidget(addQuestionsPage);
 }
 
 void MainWindow::addToSet(const QString &question, const QString &answer) {
-    std::cout << "Adding to set: " << currentSetName.toStdString() << " - Q: " << question.toStdString() << " A: " << answer.toStdString() << std::endl;
     currentSetQA.append(qMakePair(question, answer));
 }
 
 void MainWindow::openSet(const QString &setName) {
-    std::cout << "Opening set: " << setName.toStdString() << std::endl;
     UserSession *session = UserSession::getUserSession();
-
     if (session->existsStudySet(setName.toStdString())) {
         enterSetPage->setSetName(setName);
         enterSetPage->setQAList(setName);
@@ -110,89 +106,61 @@ void MainWindow::openSet(const QString &setName) {
 }
 
 void MainWindow::finishSet() {
-    std::cout << "Finishing set: " << currentSetName.toStdString() << std::endl;
     UserSession *session = UserSession::getUserSession();
     session->createStudySet(currentSetName.toStdString());
 
     for (const auto &qa : currentSetQA) {
         session->addToStudySet(currentSetName.toStdString(), qa.first.toStdString(), qa.second.toStdString());
     }
-    QListWidget *qaListWidget = new QListWidget();
-    for (const auto &qa : currentSetQA) {
-        QListWidgetItem *item = new QListWidgetItem("Q: " + qa.first + " - A: " + qa.second);
-        qaListWidget->addItem(item);
-    }
-    setWidgets.insert(currentSetName, qaListWidget);
     libraryPage->addSetButton(currentSetName);
     currentSetName.clear();
     currentSetQA.clear();
-    pageStack->setCurrentWidget(libraryPage);
-    libraryPage->populateLibrary(); // Refresh the library page
+    showLibraryPage();
 }
 
 void MainWindow::showLibraryPage() {
-    std::cout << "Showing library page" << std::endl;
-    libraryPage->populateLibrary(); // Refresh the library page each time it's shown
+    libraryPage->populateLibrary();
     pageStack->setCurrentWidget(libraryPage);
 }
 
 void MainWindow::handleDeleteSet(const QString &setName) {
-    std::cout << "Handling delete set: " << setName.toStdString() << std::endl;
-
     QMessageBox msgBox;
     msgBox.setWindowTitle("Delete Set");
     msgBox.setText("Are you sure you want to delete this set?");
     msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
     msgBox.setDefaultButton(QMessageBox::No);
+    msgBox.setStyleSheet("QMessageBox { background-color: #2b2b2b; color: #ffffff; font-size: 16px; }");
 
-    // Set general stylesheet for the QMessageBox
-    msgBox.setStyleSheet(
-            "QMessageBox {"
-            "background-color: #2b2b2b;"
-            "color: #ffffff;"
-            "font-size: 16px;"
-            "}"
-            "QPushButton {"
-            "font-size: 14px;"
-            "padding: 5px;"
-            "border-radius: 5px;"
-            "}"
-    );
-
-    // Get the No button and apply specific styles
-    QPushButton *yesButton = qobject_cast<QPushButton *>(msgBox.button(QMessageBox::Yes));
-    if (yesButton) {
-        yesButton->setStyleSheet(
-                "QPushButton {"
-                "background-color: #e5533c;"
-                "color: #000000;"
-                "}"
-                "QPushButton:hover {"
-                "background-color: #FF6347;"
-                "}"
-        );
-    }
-
-    // Get the Yes button and apply specific styles
-    QPushButton *noButton = qobject_cast<QPushButton *>(msgBox.button(QMessageBox::No));
-    if (noButton) {
-        noButton->setStyleSheet(
-                "QPushButton {"
-                "background-color: #2db544;"
-                "color: #000000;"
-                "}"
-                "QPushButton:hover {"
-                "background-color: #5DF779;"
-                "}"
-        );
-    }
-
-    // Execute the message box and handle the user's response
     if (msgBox.exec() == QMessageBox::Yes) {
         enterSetPage->deleteSet(setName);
         showLibraryPage();
     }
 }
 
+void MainWindow::showMCPage(const QString &setName) {
+    if (!setName.isEmpty()) {
+        mcPage->resetQuiz();
+        mcPage->startMCQuiz(setName);
+        pageStack->setCurrentWidget(mcPage);
+    }
+}
 
+void MainWindow::showInverseMCPage(const QString &setName) {
+    if (!setName.isEmpty()) {
+        inverseMCPage->resetQuiz();
+        inverseMCPage->startInverseMCQuiz(setName);
+        pageStack->setCurrentWidget(inverseMCPage);
+    }
+}
 
+void MainWindow::showFlashcardPage(const QString &setName) {
+    if (!setName.isEmpty()) {
+        flashcardPage->startFlashcardQuiz(setName);
+        pageStack->setCurrentWidget(flashcardPage);
+    }
+}
+
+void MainWindow::showEnterSetPage() {
+    pageStack->setCurrentWidget(enterSetPage);
+    enterSetPage->setQAList(enterSetPage->getCurrentSetName());
+}
