@@ -6,13 +6,12 @@
 UserSession* UserSession::instancePtr = nullptr;
 
 UserSession::UserSession()
-    : dbManager(DatabaseManager::getDatabaseManager("StudySets.db"))
+        : dbManager(DatabaseManager::getDatabaseManager("StudySets.db"))
 {
     if (dbManager->openDatabase()) {
         if (dbManager->executeQuery(
                 "CREATE TABLE IF NOT EXISTS set_names (id INTEGER "
-                "PRIMARY KEY, name TEXT UNIQUE);")
-            != SQLITE_OK) {
+                "PRIMARY KEY, name TEXT UNIQUE);", {}) != SQLITE_OK) {
             std::cerr << "Failed to create table set_names" << std::endl;
         }
         dbManager->closeDatabase();
@@ -53,7 +52,7 @@ int UserSession::getStudySetSize(const std::string& setName)
     }
 
     std::string query = "SELECT COUNT(*) AS count FROM " + setName;
-    auto results = dbManager->executeQueryWithResults(query);
+    auto results = dbManager->executeQueryWithResults(query, {});
 
     dbManager->closeDatabase();
 
@@ -69,7 +68,7 @@ bool UserSession::existsStudySet(const std::string& setName)
     bool exists = false;
     if (dbManager->openDatabase()) {
         std::string query = "SELECT COUNT(*) FROM set_names WHERE name = '" + setName + "';";
-        auto results = dbManager->executeQueryWithResults(query);
+        auto results = dbManager->executeQueryWithResults(query, {});
         if (!results.empty() && results[0]["COUNT(*)"] == "1") {
             exists = true;
         }
@@ -97,7 +96,7 @@ bool UserSession::createStudySet(const std::string& setName)
             sqlite3_finalize(stmt);
             if (result == SQLITE_DONE) {
                 std::string createTableQuery = "CREATE TABLE IF NOT EXISTS \"" + setName + "\" (id INTEGER PRIMARY KEY, Key TEXT UNIQUE, Value TEXT, TotalCorrect INTEGER, TimesAsked INTEGER);";
-                if (dbManager->executeQuery(createTableQuery) == SQLITE_OK) {
+                if (dbManager->executeQuery(createTableQuery,{}) == SQLITE_OK) {
                     success = true;
                 } else {
                     std::cerr << "SQL error: could not create table for " << setName
@@ -123,10 +122,10 @@ bool UserSession::deleteStudySet(const std::string& setName)
     bool success = false;
     if (dbManager->openDatabase()) {
         std::string query = "DELETE FROM set_names WHERE name = '" + setName + "';";
-        int result = dbManager->executeQuery(query);
+        int result = dbManager->executeQuery(query,{});
         if (result == SQLITE_OK) {
             std::string dropTableQuery = "DROP TABLE IF EXISTS \"" + setName + "\";";
-            int dropResult = dbManager->executeQuery(dropTableQuery);
+            int dropResult = dbManager->executeQuery(dropTableQuery,{});
             if (dropResult == SQLITE_OK) {
                 success = true;
             } else {
@@ -149,7 +148,7 @@ bool UserSession::addToStudySet(const std::string& setName, const std::string& k
     bool success = false;
     if (dbManager->openDatabase()) {
         std::string query = "INSERT INTO \"" + setName + "\" (Key, Value, TotalCorrect, TimesAsked) VALUES ('" + key + "', '" + value + "', 0, 0);";
-        int result = dbManager->executeQuery(query);
+        int result = dbManager->executeQuery(query,{});
         if (result == SQLITE_OK) {
             success = true;
         }
@@ -165,7 +164,7 @@ bool UserSession::deleteFromStudySet(const std::string& setName, const std::stri
     bool success = false;
     if (dbManager->openDatabase()) {
         std::string query = "DELETE FROM \"" + setName + "\" WHERE Key = '" + key + "';";
-        int result = dbManager->executeQuery(query);
+        int result = dbManager->executeQuery(query,{});
         if (result == SQLITE_OK) {
             success = true;
         }
@@ -200,7 +199,7 @@ bool UserSession::updateScore(const std::string& setName, const std::string& key
             query += ", TotalCorrect = TotalCorrect + 1";
         }
         query += " WHERE Key = '" + key + "';";
-        int result = dbManager->executeQuery(query);
+        int result = dbManager->executeQuery(query,{});
         if (result == SQLITE_OK) {
             success = true;
         } else {
@@ -224,7 +223,7 @@ std::vector<std::pair<std::string, std::string>> UserSession::getTableKeyValues(
 
     if (dbManager->openDatabase()) {
         std::string query = "SELECT Key, Value FROM \"" + setName + "\";";
-        auto results = dbManager->executeQueryWithResults(query);
+        auto results = dbManager->executeQueryWithResults(query,{});
         for (const auto& row : results) {
             keyValues.emplace_back(row.at("Key"), row.at("Value"));
         }
@@ -245,7 +244,7 @@ std::vector<std::tuple<int, std::string, std::string, int, int>> UserSession::ge
 
     if (dbManager->openDatabase()) {
         std::string query = "SELECT id, Key, Value, TotalCorrect, TimesAsked FROM \"" + setName + "\";";
-        auto results = dbManager->executeQueryWithResults(query);
+        auto results = dbManager->executeQueryWithResults(query,{});
         for (const auto& row : results) {
             int id = std::stoi(row.at("id"));
             std::string key = row.at("Key");
@@ -266,7 +265,7 @@ std::vector<std::map<std::string, std::string>> UserSession::getMainTable()
     std::vector<std::map<std::string, std::string>> mainTable;
     if (dbManager->openDatabase()) {
         std::string query = "SELECT * FROM set_names;";
-        mainTable = dbManager->executeQueryWithResults(query);
+        mainTable = dbManager->executeQueryWithResults(query,{});
         dbManager->closeDatabase();
     } else {
         std::cerr << "Failed to open database for getMainTable" << std::endl;
@@ -286,10 +285,10 @@ std::vector<std::tuple<std::string, std::string, float>> UserSession::getLowestA
         std::string query = "SELECT Key, Value, "
                             "CASE WHEN TimesAsked = 0 THEN 0 ELSE (TotalCorrect * 1.0 / TimesAsked) END as Accuracy "
                             "FROM \""
-            + setName + "\" "
-                        "ORDER BY Accuracy ASC LIMIT "
-            + std::to_string(x) + ";";
-        auto results = dbManager->executeQueryWithResults(query);
+                            + setName + "\" "
+                                        "ORDER BY Accuracy ASC LIMIT "
+                            + std::to_string(x) + ";";
+        auto results = dbManager->executeQueryWithResults(query,{});
         for (const auto& row : results) {
             lowestAccuracies.emplace_back(row.at("Key"), row.at("Value"), std::stof(row.at("Accuracy")));
         }
@@ -310,7 +309,7 @@ std::vector<std::pair<std::string, std::string>> UserSession::getRandomEntries(c
 
     if (dbManager->openDatabase()) {
         std::string query = "SELECT Key, Value FROM \"" + setName + "\" ORDER BY RANDOM() LIMIT " + std::to_string(x) + ";";
-        auto results = dbManager->executeQueryWithResults(query);
+        auto results = dbManager->executeQueryWithResults(query,{});
         for (const auto& row : results) {
             randomEntries.emplace_back(row.at("Key"), row.at("Value"));
         }
@@ -328,14 +327,14 @@ bool UserSession::emptyAllSets()
     if (dbManager->openDatabase()) {
         // Get all study set names
         std::string query = "SELECT name FROM set_names;";
-        auto results = dbManager->executeQueryWithResults(query);
+        auto results = dbManager->executeQueryWithResults(query,{});
 
         for (const auto& row : results) {
             std::string setName = row.at("name");
 
             // Drop each table corresponding to the study set name
             std::string dropTableQuery = "DROP TABLE IF EXISTS \"" + setName + "\";";
-            int dropResult = dbManager->executeQuery(dropTableQuery);
+            int dropResult = dbManager->executeQuery(dropTableQuery,{});
             if (dropResult != SQLITE_OK) {
                 std::cerr << "SQL error: could not drop table for " << setName
                           << ". Error: " << sqlite3_errmsg(dbManager->db) << std::endl;
@@ -345,7 +344,7 @@ bool UserSession::emptyAllSets()
 
         // Clear the set_names table
         std::string clearSetNamesQuery = "DELETE FROM set_names;";
-        int clearResult = dbManager->executeQuery(clearSetNamesQuery);
+        int clearResult = dbManager->executeQuery(clearSetNamesQuery,{});
         if (clearResult != SQLITE_OK) {
             std::cerr << "SQL error: could not clear set_names table. Error: "
                       << sqlite3_errmsg(dbManager->db) << std::endl;

@@ -65,16 +65,16 @@ int DatabaseManager::executeQuery(const std::string& query, std::vector<std::str
 }
 
 
-static int callbackStore(void* data, int argc, char** argv, char** azColName)
-{
-    auto* rows = static_cast<std::vector<std::map<std::string, std::string>>*>(data);
-    std::map<std::string, std::string> row;
-    for (int i = 0; i < argc; i++) {
-        row[azColName[i]] = argv[i] ? argv[i] : "NULL";
-    }
-    rows->push_back(row);
-    return 0;
-}
+//static int callbackStore(void* data, int argc, char** argv, char** azColName)
+//{
+//    auto* rows = static_cast<std::vector<std::map<std::string, std::string>>*>(data);
+//    std::map<std::string, std::string> row;
+//    for (int i = 0; i < argc; i++) {
+//        row[azColName[i]] = argv[i] ? argv[i] : "NULL";
+//    }
+//    rows->push_back(row);
+//    return 0;
+//}
 
 std::vector<std::map<std::string, std::string>> DatabaseManager::executeQueryWithResults(const std::string& query, std::vector<std::string> params) const
 {

@@ -54,8 +54,8 @@ public:
      * @return True if the key-value pair was added successfully, false otherwise.
      */
     bool addToStudySet(const std::string& setName,
-        const std::string& Key,
-        const std::string& Value);
+                       const std::string& Key,
+                       const std::string& Value);
 
     /**
      * @brief Deletes a key-value pair from a study set in the database.
